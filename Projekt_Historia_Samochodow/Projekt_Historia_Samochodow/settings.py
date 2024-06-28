@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'projekt_historia_samochodow.apps.ProjektHistoriaSamochodowConfig',
+    'phonenumber_field'
 ]
 
 MIDDLEWARE = [
@@ -77,10 +78,23 @@ WSGI_APPLICATION = 'Projekt_Historia_Samochodow.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'historia_samochodow',
+        'USER': 'adminmaciek',
+        'PASSWORD': 'adminmaciek',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
+
+# alternative database config
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -123,3 +137,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#PhoneNumber settings
+
+PHONENUMBER_DB_FORMAT = "NATIONAL"
+
+PHONENUMBER_DEFAULT_REGION = 'PL'
