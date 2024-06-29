@@ -49,7 +49,17 @@ class CarOwner(models.Model):
     last_name = models.CharField(max_length=64)
     phone_number = PhoneNumberField(unique=True)
     email = models.EmailField(unique=True)
-    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+
+
+class Repair(models.Model):
+    mileage = models.PositiveIntegerField()
+    type_of_repair = models.CharField(choices=REPAIR_TYPES)
+    description = models.TextField()
+    part = models.CharField(max_length=64)
+    part_number = models.CharField(max_length=64)
+    price = models.DecimalField(max_digits=8 ,decimal_places=2)
+    recommendations = models.TextField()
+    date_of_repair = models.DateField()
 
 
 class Car(models.Model):
@@ -68,17 +78,6 @@ class Car(models.Model):
     date_of_first_registration = models.DateField()
     number_of_the_registration_certificate = models.CharField(max_length=15)
     car_photos = models.ImageField(upload_to='zdj_samochodow/%Y/%m/%d/')
-    owner = models.OneToOneField(CarOwner, on_delete=models.CASCADE)
-    repairs = models.ManyToManyField(Car, through='Repair')
+    owner = models.OneToOneField(CarOwner, on_delete=models.CASCADE, null=False)
+    repairs = models.ManyToManyField(Repair)
 
-
-class Repair(models.Model):
-    car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    mileage = models.PositiveIntegerField()
-    type_of_repair = models.CharField(choices=REPAIR_TYPES)
-    description = models.TextField()
-    part = models.CharField(max_length=64)
-    part_number = models.CharField(max_length=64)
-    price = models.DecimalField(decimal_places=2)
-    recommedations = models.TextField()
-    date_of_repair = models.DateField()
