@@ -56,8 +56,7 @@ ROOT_URLCONF = 'Projekt_Historia_Samochodow.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -138,7 +137,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#PhoneNumber settings
+# PhoneNumber settings
 
 PHONENUMBER_DB_FORMAT = "NATIONAL"
 

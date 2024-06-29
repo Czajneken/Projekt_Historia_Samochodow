@@ -44,11 +44,13 @@ REPAIR_TYPES = (
 )
 
 
-class CarOwner(models.Model):
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
-    phone_number = PhoneNumberField(unique=True)
-    email = models.EmailField(unique=True)
+FUEL_TYPES = (
+    (1, "PB95"),
+    (2, "PB98"),
+    (3, "LPG+PB95"),
+    (4, "LPG+PB98"),
+    (5, "DIESEL"),
+)
 
 
 class Repair(models.Model):
@@ -57,7 +59,7 @@ class Repair(models.Model):
     description = models.TextField()
     part = models.CharField(max_length=64)
     part_number = models.CharField(max_length=64)
-    price = models.DecimalField(max_digits=8 ,decimal_places=2)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
     recommendations = models.TextField()
     date_of_repair = models.DateField()
 
@@ -70,14 +72,20 @@ class Car(models.Model):
     engine_power_HP = models.PositiveSmallIntegerField()
     engine_power_kW = models.PositiveSmallIntegerField()
     mileage = models.PositiveIntegerField()
-    type_of_fuel = models.CharField(max_length=10)
+    type_of_fuel = models.CharField(choices=FUEL_TYPES)
     body_type = models.CharField(choices=BODY_TYPES)
     plate_number = models.CharField(max_length=15)
     VIN = models.IntegerField()
-    year_of_production = models.PositiveSmallIntegerField
+    year_of_production = models.PositiveSmallIntegerField()
     date_of_first_registration = models.DateField()
     number_of_the_registration_certificate = models.CharField(max_length=15)
     car_photos = models.ImageField(upload_to='zdj_samochodow/%Y/%m/%d/')
-    owner = models.OneToOneField(CarOwner, on_delete=models.CASCADE, null=False)
     repairs = models.ManyToManyField(Repair)
 
+
+class CarOwner(models.Model):
+    first_name = models.CharField(max_length=64)
+    last_name = models.CharField(max_length=64)
+    phone_number = PhoneNumberField(unique=True)
+    email = models.EmailField(unique=True)
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, null=False)
