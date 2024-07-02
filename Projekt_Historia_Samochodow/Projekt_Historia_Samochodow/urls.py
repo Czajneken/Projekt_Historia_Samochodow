@@ -17,6 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from projekt_historia_samochodow import views as phs_views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', phs_views.MainView.as_view(), name='main'),
+    path('search_car_report/', phs_views.SearchCarReportView.as_view(), name='search_car_report'),
+    path('car_report/<int:car_id>/', phs_views.CarReportView.as_view(), name='car_report'),
 ]
+
+

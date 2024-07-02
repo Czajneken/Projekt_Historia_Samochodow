@@ -54,38 +54,47 @@ FUEL_TYPES = (
 
 
 class Repair(models.Model):
-    mileage = models.PositiveIntegerField()
-    type_of_repair = models.CharField(choices=REPAIR_TYPES)
-    description = models.TextField()
-    part = models.CharField(max_length=64)
-    part_number = models.CharField(max_length=64)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
-    recommendations = models.TextField()
-    date_of_repair = models.DateField()
+    part = models.CharField(max_length=64, verbose_name="Nazwa części")
+    part_number = models.CharField(max_length=64, verbose_name="Numer części")
+    price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Cena")
+    mileage = models.PositiveIntegerField(verbose_name="Przebieg")
+    type_of_repair = models.IntegerField(choices=REPAIR_TYPES, verbose_name="Rodzaj naprawy")
+    description = models.TextField(verbose_name="Opis")
+    recommendations = models.TextField(verbose_name="Zalecenia")
+    date_of_repair = models.DateField(verbose_name="Data naprawy")
+
+    def __str__(self):
+        return self.part
 
 
 class Car(models.Model):
-    brand = models.CharField(max_length=64)
-    model = models.CharField(max_length=64)
-    color = models.CharField(max_length=20)
-    engine_size = models.PositiveSmallIntegerField()
-    engine_power_HP = models.PositiveSmallIntegerField()
-    engine_power_kW = models.PositiveSmallIntegerField()
-    mileage = models.PositiveIntegerField()
-    type_of_fuel = models.CharField(choices=FUEL_TYPES)
-    body_type = models.CharField(choices=BODY_TYPES)
-    plate_number = models.CharField(max_length=15)
-    VIN = models.IntegerField()
-    year_of_production = models.PositiveSmallIntegerField()
-    date_of_first_registration = models.DateField()
-    number_of_the_registration_certificate = models.CharField(max_length=15)
-    car_photos = models.ImageField(upload_to='zdj_samochodow/%Y/%m/%d/')
-    repairs = models.ManyToManyField(Repair)
+    brand = models.CharField(max_length=64, verbose_name="Marka")
+    model = models.CharField(max_length=64, verbose_name="Model")
+    color = models.CharField(max_length=20, verbose_name="Kolor")
+    engine_size = models.PositiveSmallIntegerField(verbose_name="Pojemność silnika (w cm3)")
+    engine_power_HP = models.PositiveSmallIntegerField(verbose_name="Moc silnika w KM")
+    engine_power_kW = models.PositiveSmallIntegerField(verbose_name="Moc silnika w kW")
+    mileage = models.PositiveIntegerField(verbose_name="Przebieg")
+    type_of_fuel = models.IntegerField(choices=FUEL_TYPES, verbose_name="Rodzaj paliwa")
+    body_type = models.IntegerField(choices=BODY_TYPES, verbose_name="Typ nadwozia")
+    plate_number = models.CharField(max_length=15, verbose_name="Numer rejestracyjny")
+    VIN = models.CharField(max_length=17)
+    year_of_production = models.PositiveSmallIntegerField(verbose_name="Data produkcji")
+    date_of_first_registration = models.DateField(verbose_name="Data pierwszej rejestracji")
+    number_of_the_registration_certificate = models.CharField(max_length=15, verbose_name="Numer dowodu rejestracyjnego")
+    car_photos = models.ImageField(upload_to='media', verbose_name="Zdjęcia samochodu")
+    repairs = models.ManyToManyField(Repair, blank=True)
+
+    def __str__(self):
+        return self.plate_number
 
 
 class CarOwner(models.Model):
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
-    phone_number = PhoneNumberField(unique=True)
-    email = models.EmailField(unique=True)
-    car = models.ForeignKey(Car, on_delete=models.CASCADE, null=False)
+    first_name = models.CharField(max_length=64, verbose_name="Imię")
+    last_name = models.CharField(max_length=64, verbose_name="Nazwisko")
+    phone_number = PhoneNumberField(unique=True, verbose_name="Telefon")
+    email = models.EmailField(unique=True, verbose_name="Email")
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, null=False, verbose_name="Samochód")
+
+    def __str__(self):
+        return self.first_name

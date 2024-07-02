@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('VIN', models.IntegerField()),
                 ('date_of_first_registration', models.DateField()),
                 ('number_of_the_registration_certificate', models.CharField(max_length=15)),
-                ('car_photos', models.ImageField(upload_to='zdj_samochodow/%Y/%m/%d/')),
+                ('car_photos', models.ImageField(upload_to='media/%Y/%m/%d/')),
             ],
         ),
     ]
