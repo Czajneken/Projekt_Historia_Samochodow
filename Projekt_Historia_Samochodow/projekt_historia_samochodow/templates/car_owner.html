@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h4>Dane klienta:</h4>
+    <ul>
+        <li>Imię: {{ car_owner.first_name }}</li>
+        <li>Nazwisko: {{ car_owner.last_name }}</li>
+        <li>Telefon: {{ car_owner.phone_number }}</li>
+        <li>Email: {{ car_owner.email }}</li>
+        <li>Samochód: {{ car_owner.car }}</li>
+    </ul>
+{% endblock %}

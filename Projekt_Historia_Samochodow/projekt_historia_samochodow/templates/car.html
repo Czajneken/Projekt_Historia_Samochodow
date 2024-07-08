@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h4>Dane samochodu: {{ car.plate_number }}</h4>
+    <ol>
+        <li>Marka: {{ car.brand }}</li>
+        <li>Model: {{ car.model }}</li>
+        <li>Kolor: {{ car.color }}</li>
+        <li>Pojemność silnika (w cm3): {{ car.engine_size }}</li>
+        <li>Moc silnika w KM: {{ car.engine_power_HP }}</li>
+        <li>Moc silnika w kW: {{ car.engine_power_kW }}</li>
+        <li>Przebieg: {{ car.mileage }}</li>
+        <li>Rodzaj paliwa: {{ car.get_type_of_fuel_display }}</li>
+        <li>Rodzaj nadwozia: {{ car.get_body_type_display }}</li>
+        <li>Numer rejestracyjny: {{ car.plate_number }}</li>
+        <li>VIN: {{ car.VIN }} </li>
+        <li>Data produkcji: {{ car.year_of_production }}</li>
+        <li>Data pierwszej rejestracji: {{ car.date_of_first_registration }}</li>
+        <li>Numer dowodu rejestracyjnego: {{ car.number_of_the_registration_certificate }}</li>
+        <li>Przeprowadzone naprawy: {{ car.repairs }}</li>
+        <li>Zdjęcia samochodu: <img src="{{ car.car_photos }}" alt="zdj_samochodu"></li>
+    </ol>
+    <h4>Właściciel:</h4>
+    <ul>
+        <li>Imię: {{ car_owner.first_name }}</li>
+        <li>Nazwisko: {{ car_owner.last_name }}</li>
+        <li>Telefon: {{ car_owner.phone_number }}</li>
+        <li>Email: {{ car_owner.email }}</li>
+    </ul>
+{% endblock %}

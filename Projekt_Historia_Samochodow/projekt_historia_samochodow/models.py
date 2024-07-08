@@ -83,7 +83,7 @@ class Car(models.Model):
     date_of_first_registration = models.DateField(verbose_name="Data pierwszej rejestracji")
     number_of_the_registration_certificate = models.CharField(max_length=15, verbose_name="Numer dowodu rejestracyjnego")
     car_photos = models.ImageField(upload_to='media', verbose_name="Zdjęcia samochodu")
-    repairs = models.ManyToManyField(Repair, blank=True)
+    repairs = models.ManyToManyField(Repair, verbose_name="Przeprowadzone naprawy")
 
     def __str__(self):
         return self.plate_number
@@ -98,3 +98,19 @@ class CarOwner(models.Model):
 
     def __str__(self):
         return self.first_name
+
+
+class Events(models.Model):
+    name = models.CharField(max_length=255, null=True, blank=True)
+    start = models.DateTimeField(null=True, blank=True)
+    end = models.DateTimeField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = ('Calendar Events')
+        verbose_name_plural = ('Calendar Events')
+
+    def __str__(self):
+        return self.name

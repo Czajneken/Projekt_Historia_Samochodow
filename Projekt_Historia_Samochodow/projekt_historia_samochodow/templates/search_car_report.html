@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Szukaj">
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Szukaj">
+    </form>
+    {% if request.method == "POST" %}
+        <a href="{% url "projekt_historia_samochodow:pdf_car_report" car.pk%}"><button>Generuj raport</button></a>
+    {% endif %}
 {% endblock %}
