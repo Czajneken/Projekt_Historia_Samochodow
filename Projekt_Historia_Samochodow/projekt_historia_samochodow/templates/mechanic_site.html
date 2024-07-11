@@ -1,21 +1,10 @@
-<!DOCTYPE html>
-<html lang='en'>
-  <head>
-    <meta charset='utf-8' />
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
-    <script>
+{% extends "calendar.html" %}
 
-      document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth'
-        });
-        calendar.render();
-      });
-
-    </script>
-  </head>
-  <body>
-    <div id='calendar'></div>
-  </body>
-</html>
+{% block content %}
+    <a href="{% url 'logout' %}"><button>Wyloguj</button></a><br>
+    <a href="{% url 'add_car' %}">Dodaj samochód</a><br>
+    <a href="{% url 'add_car_owner' %}">Dodaj klienta</a><br>
+    <a href="{% url 'add_repair' %}">Dodaj naprawę</a><br>
+    <a href="{% url 'car_list' %}">Lista samochodów</a><br>
+    <a href="{% url 'car_owner_list' %}">Lista klientów</a><br>
+{% endblock content %} 

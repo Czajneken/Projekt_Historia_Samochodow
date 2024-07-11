@@ -1,13 +1,20 @@
 from django.contrib.auth import get_user_model, login, logout
-from django.contrib.staticfiles import finders
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import get_template
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, FormView, ListView, UpdateView, DeleteView, TemplateView
+from django.views.generic import FormView, ListView, TemplateView, UpdateView
 
-from .forms import SearchCarReportForm, AddCarForm, AddCarOwnerForm, AddRepairForm
+import json
+
+from .forms import (
+    SearchCarReportForm,
+    AddCarForm,
+    AddCarOwnerForm,
+    AddRepairForm,
+    LoginForm
+)
 from .models import (
     BODY_TYPES,
     REPAIR_TYPES,
@@ -15,7 +22,7 @@ from .models import (
     Repair,
     Car,
     CarOwner,
-    Events
+    Event
 )
 
 from xhtml2pdf import pisa
@@ -46,8 +53,12 @@ class SearchCarReportView(View):
 
 def render_pdf_view(request, *args, **kwargs):
     car = get_object_or_404(Car, pk=kwargs['car_id'])
+    car_repairs = Repair.objects.filter(car=kwargs['car_id'])
     template_path = 'pdf/pdf_car_report.html'
-    context = {'car': car}
+    context = {
+        'car': car,
+        'car_repairs': car_repairs,
+       }
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'filename="raport_{car.plate_number}.pdf"'
@@ -117,9 +128,11 @@ class CarView(View):
     def get(self, request, *args, **kwargs):
         car = get_object_or_404(Car, pk=kwargs['car_id'])
         car_owner = get_object_or_404(CarOwner, car=kwargs['car_id'])
+        car_repairs = Repair.objects.filter(car=kwargs['car_id'])
         context = {
             'car': car,
             'car_owner': car_owner,
+            'car_repairs': car_repairs,
         }
         return render(request, 'car.html', context)
 
@@ -150,8 +163,14 @@ class AddCarOwnerView(View):
 
 class RepairView(View):
     def get(self, request, *args, **kwargs):
-        repair = get_object_or_404(Repair, pk=kwargs['repair_id'])
+        car_pk = kwargs['car_id']
+        repair_pk = kwargs['repair_id']
+
+        car = get_object_or_404(Car, pk=car_pk)
+        repair = get_object_or_404(Repair, pk=repair_pk)
+
         context = {
+            'car': car,
             'repair': repair,
         }
         return render(request, 'repair.html', context)
@@ -172,60 +191,150 @@ class AddRepairView(View):
         return render(request, 'add_repair.html', context)
 
 
+def calendar_view(request):
+    return render(request, 'calendar.html')
+
+def events_json(request):
+    events = Event.objects.all()
+    events_list = []
+    for event in events:
+        events_list.append({
+            'id': event.id,
+            'title': event.title,
+            'start': event.start.isoformat(),
+            'end': event.end.isoformat() if event.end else None,
+        })
+    return JsonResponse(events_list, safe=False)
+
+
+def add_event(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        title = data.get('title')
+        start = data.get('start')
+        end = data.get('end')
+        if title and start:
+            event = Event.objects.create(title=title, start=start, end=end)
+            return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end})
+    return HttpResponseBadRequest("Invalid request")
+
+
+def update_event(request, event_id):
+    try:
+        event = Event.objects.get(id=event_id)
+    except Event.DoesNotExist:
+        return HttpResponseBadRequest("Event not found")
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+        event.title = data.get('title', event.title)
+        event.start = data.get('start', event.start)
+        event.end = data.get('end', event.end)
+        event.save()
+        return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end})
+
+    return HttpResponseBadRequest("Invalid request")
+
+
+
+def delete_event(request, event_id):
+    try:
+        event = Event.objects.get(id=event_id)
+    except Event.DoesNotExist:
+        return HttpResponseBadRequest("Event not found")
+
+    if request.method == "DELETE":
+        event.delete()
+        return JsonResponse({"status": "deleted"})
+
+    return HttpResponseBadRequest("Invalid request")
+
+
 class MechanicView(View):
     def get(self, request, *args, **kwargs):
-        all_events = Events.objects.all()
-        context = {
-            "events": all_events,
-        }
-        return render(request, 'calendar.html', context)
+        return render(request, 'mechanic_site.html')
 
 
-class CalendarAllEventsView(View):
+# class CalendarAllEventsView(View):
+#     def get(self, request, *args, **kwargs):
+#         events = Event.objects.all()
+#         events_list = []
+#         for event in events:
+#             events_list.append({
+#                 'id': event.id,
+#                 'title': event.title,
+#                 'start': event.start.isoformat(),
+#                 'end': event.end.isoformat() if event.end else None,
+#                 'description': event.description,
+#             })
+#         return JsonResponse(events_list, safe=False)
+#
+#
+# class CalendarAddEventView(View):
+#     def add_event(request):
+#         if request.method == "POST":
+#             data = json.loads(request.body)
+#             title = data.get('title')
+#             start = data.get('start')
+#             end = data.get('end')
+#             description = data.get('description')
+#             if title and start:
+#                 event = Event.objects.create(title=title, start=start, end=end, description=description)
+#                 return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end, 'description': event.description})
+#         return HttpResponseBadRequest("Invalid request")
+#
+#
+# class CalendarUpdateEventView(View):
+#     def update_event(request, event_id):
+#         try:
+#             event = Event.objects.get(id=event_id)
+#         except Event.DoesNotExist:
+#             return HttpResponseBadRequest("Event not found")
+#
+#         if request.method == "POST":
+#             data = json.loads(request.body)
+#             event.title = data.get('title', event.title)
+#             event.start = data.get('start', event.start)
+#             event.end = data.get('end', event.end)
+#             event.description = data.get('description', event.description)
+#             event.save()
+#             return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end, 'description': event.description})
+#
+#         return HttpResponseBadRequest("Invalid request")
+#
+#
+# class CalendarDeleteEventView(View):
+#     def delete_event(request, event_id):
+#         try:
+#             event = Event.objects.get(id=event_id)
+#         except Event.DoesNotExist:
+#             return HttpResponseBadRequest("Event not found")
+#
+#         if request.method == "DELETE":
+#             event.delete()
+#             return JsonResponse({"status": "deleted"})
+#
+#         return HttpResponseBadRequest("Invalid request")
+
+
+class LoginView(FormView):
+    form_class = LoginForm
+    template_name = 'login.html'
+    success_url = reverse_lazy('mechanic')
+
+
+class LogoutView(View):
     def get(self, request, *args, **kwargs):
-        all_events = Events.objects.all()
-        out = []
-        for event in all_events:
-            out.append({
-                'title': event.name,
-                'pk': event.pk,
-                'start': event.start.strftime("%m/%d/%Y, %H:%M:%S"),
-                'end': event.end.strftime("%m/%d/%Y, %H:%M:%S"),
-            })
-
-        return JsonResponse(out, safe=False)
+        logout(request)
+        return redirect('main')
 
 
-class CalendarAddEventView(View):
-    def get(self, request, *args, **kwargs):
-        start = request.GET.get("start", None)
-        end = request.GET.get("end", None)
-        title = request.GET.get("title", None)
-        event = Events(name=str(title), start=start, end=end)
-        event.save()
-        data = {}
-        return JsonResponse(data)
+class CarListView(ListView):
+    model = Car
+    template_name = "car_list.html"
 
 
-class CalendarUpdateEventView(View):
-    def get(self, request, *args, **kwargs):
-        start = request.GET.get("start", None)
-        end = request.GET.get("end", None)
-        title = request.GET.get("title", None)
-        pk = request.GET.get("pk", None)
-        event = Events.objects.get(pk=pk)
-        event.start = start
-        event.end = end
-        event.name = title
-        event.save()
-        data = {}
-        return JsonResponse(data)
+class CarOwmerListView(ListView):
+    model = CarOwner
+    template_name = "car_owner_list.html"
 
-
-class CalendarRemoveEventView(View):
-    def get(self, request, *args, **kwargs):
-        pk = request.GET.get("pk", None)
-        event = Events.objects.get(pk=pk)
-        event.delete()
-        data = {}
-        return JsonResponse(data)

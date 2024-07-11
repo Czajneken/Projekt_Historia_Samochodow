@@ -1,16 +1,136 @@
-{% extends "calendar_base.html" %}
-
-{% block title %}
-    Fullcalendar
-{% endblock title %}
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-{% block content %}
-    <a href="{% url 'add_car' %}">Dodaj samochód</a><br>
-    <a href="{% url 'add_car_owner' %}">Dodaj klienta</a><br>
-    <a href="{% url 'add_repair' %}">Dodaj naprawę</a><br>
-    <div class="col-md-12">
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+        <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@5.11.3/main.min.js'></script>
+    </head>
+    <body>
+        {% block content %}
+        {% endblock %}
         <div id='calendar'></div>
-    </div>
-{% endblock content %} 
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var calendarEl = document.getElementById('calendar');
+
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    editable: true,
+                    selectable: true,
+                    events: '/api/events/', // URL do API
+                    select: function(info) {
+                        var title = prompt('Podaj tytuł wydarzenia:');
+                        if (title) {
+                            var eventData = {
+                                title: title,
+                                start: info.startStr,
+                                end: info.endStr
+                            };
+                            fetch('/api/events/add/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': getCookie('csrftoken')
+                                },
+                                body: JSON.stringify(eventData)
+                            })
+                            .then(response => response.json())
+                            .then(event => {
+                                calendar.addEvent(event);
+                            });
+                        }
+                        calendar.unselect();
+                    },
+                    eventClick: function(info) {
+                        var title = prompt('Zaktualizuj tytuł wydarzenia:', info.event.title);
+                        if (title) {
+                            var eventData = {
+                                title: title,
+                                start: info.event.start.toISOString(),
+                                end: info.event.end ? info.event.end.toISOString() : null
+                            };
+                            fetch('/api/events/update/' + info.event.id + '/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': getCookie('csrftoken')
+                                },
+                                body: JSON.stringify(eventData)
+                            })
+                            .then(response => response.json())
+                            .then(event => {
+                                info.event.setProp('title', event.title);
+                                info.event.setStart(event.start);
+                                info.event.setEnd(event.end);
+                            });
+                        }
+                    },
+                    eventDrop: function(info) {
+                        var eventData = {
+                            title: info.event.title,
+                            start: info.event.start.toISOString(),
+                            end: info.event.end ? info.event.end.toISOString() : null
+                        };
+                        fetch('/api/events/update/' + info.event.id + '/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify(eventData)
+                        });
+                    },
+                    eventResize: function(info) {
+                        var eventData = {
+                            title: info.event.title,
+                            start: info.event.start.toISOString(),
+                            end: info.event.end.toISOString()
+                        };
+                        fetch('/api/events/update/' + info.event.id + '/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify(eventData)
+                        });
+                    },
+                    eventClick: function(info) {
+                        if (confirm('Czy na pewno chcesz usunąć to wydarzenie?')) {
+                            fetch('/api/events/delete/' + info.event.id + '/', {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': getCookie('csrftoken')
+                                }
+                            })
+                            .then(() => {
+                                info.event.remove();
+                            });
+                        }
+                    }
+                });
+
+                calendar.render();
+            });
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        </script>
+    </body>
+</html>

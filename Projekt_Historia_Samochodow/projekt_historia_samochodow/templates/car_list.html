@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <a href="{% url 'mechanic' %}"><button>Wróć do strony głównej</button></a>
+    <ol>
+        {% for car in object_list %}
+            <li>
+                {{ car.brand }} - {{ car.plate_number }}
+                <a href="{% url 'car' car.pk%}"><button>Szczegóły</button></a>
+            </li><hr>
+        {% endfor %}
+    </ol>
+{% endblock %}

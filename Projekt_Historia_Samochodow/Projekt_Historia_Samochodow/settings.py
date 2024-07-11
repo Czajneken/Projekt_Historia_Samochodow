@@ -80,8 +80,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'historia_samochodow',
-        'USER': 'adminmaciek',
-        'PASSWORD': 'adminmaciek',
+        'USER': 'postgres',
+        'PASSWORD': 'coderslab',
         'HOST': 'localhost',
         'PORT': '5432',
     }

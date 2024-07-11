@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <a href="{% url 'car' car.pk %}"><button>Powrót</button></a>
     <ul>
         <li>Nazwa części: {{ repair.part }}</li>
         <li>Numer części: {{ repair.part_number }}</li>
         <li>Cena: {{ repair.price }} zł</li>
         <li>Przebieg: {{ repair.mileage }} km</li>
         <li>Rodzaj naprawy: {{ repair.get_type_of_repair_display }}</li>
-        <li>Opis: {{ repair.description }}</li>
-        <li>Zalecenia: {{ repair.recommendations }}</li>
+        <li>Opis: {{ repair.description|linebreaks }}</li>
+        <li>Zalecenia: {{ repair.recommendations|linebreaks }}</li>
         <li>Data naprawy: {{ repair.date_of_repair }}</li>
     </ul>
 {% endblock %}

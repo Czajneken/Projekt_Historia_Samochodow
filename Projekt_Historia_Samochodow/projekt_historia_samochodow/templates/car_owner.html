@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <a href="{% url 'car_owner_list' %}"><button>Powrót</button></a>
     <h4>Dane klienta:</h4>
     <ul>
         <li>Imię: {{ car_owner.first_name }}</li>

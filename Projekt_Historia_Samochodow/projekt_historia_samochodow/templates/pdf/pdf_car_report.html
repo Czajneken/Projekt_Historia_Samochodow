@@ -28,7 +28,15 @@
             <li>Data produkcji: {{ car.year_of_production }}</li>
             <li>Data pierwszej rejestracji: {{ car.date_of_first_registration }}</li>
             <li>Numer dowodu rejestracyjnego: {{ car.number_of_the_registration_certificate }}</li>
-            <li>Przeprowadzone naprawy: {{ car.repairs }}</li>
+            <li>Przeprowadzone naprawy:
+                <ul>
+                {% for car_repair in car_repairs %}
+                    <li>
+                        {{ car_repair.mileage }} km - {{ car_repair }}
+                    </li>
+                {% endfor %}
+            </ul>
+            </li>
             <li>Zdjęcia samochodu: <img src="media/{{ car.car_photos }}" alt="zdj_samochodu"></li>
         </ol>
     </body>

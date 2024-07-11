@@ -47,3 +47,17 @@ class AddRepairForm(forms.ModelForm):
     class Meta:
         model = Repair
         fields = "__all__"
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    def clean(self):
+        cd = super().clean()
+        username = cd.get('username')
+        password = cd.get('password')
+        user = authenticate(username=username, password=password)
+        if user is None:
+            raise ValidationError("Podaj poprawny login lub hasło")
+

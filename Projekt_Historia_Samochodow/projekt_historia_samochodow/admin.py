@@ -4,11 +4,11 @@ from .models import (
     Repair,
     Car,
     CarOwner,
-    Events
+    Event
 )
 
 
 admin.site.register(Repair)
 admin.site.register(Car)
 admin.site.register(CarOwner)
-admin.site.register(Events)
+admin.site.register(Event)
