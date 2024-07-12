@@ -5,7 +5,7 @@
     <ol>
         {% for car in object_list %}
             <li>
-                {{ car.brand }} - {{ car.plate_number }}
+                {{ car.brand }} {{ car.model }} - {{ car.plate_number }}
                 <a href="{% url 'car' car.pk%}"><button>Szczegóły</button></a>
             </li><hr>
         {% endfor %}

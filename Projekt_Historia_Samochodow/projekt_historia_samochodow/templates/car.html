@@ -10,7 +10,7 @@
         <li>Pojemność silnika (w cm3): {{ car.engine_size }}</li>
         <li>Moc silnika w KM: {{ car.engine_power_HP }}</li>
         <li>Moc silnika w kW: {{ car.engine_power_kW }}</li>
-        <li>Przebieg: {{ car.mileage }}</li>
+        <li>Przebieg: {{ car.mileage }} km</li>
         <li>Rodzaj paliwa: {{ car.get_type_of_fuel_display }}</li>
         <li>Rodzaj nadwozia: {{ car.get_body_type_display }}</li>
         <li>Numer rejestracyjny: {{ car.plate_number }}</li>
@@ -22,7 +22,7 @@
             <ul>
                 {% for car_repair in car_repairs %}
                     <li>
-                        {{ car_repair.mileage }} km - {{ car_repair }}
+                        {{ car_repair.mileage }} km - {{ car_repair.part }}
                         <a href="{% url 'repair' car_id=car.pk repair_id=car_repair.pk %}"><button>Szczegóły</button></a>
                     </li>
                 {% endfor %}

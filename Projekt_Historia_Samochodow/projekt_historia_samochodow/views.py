@@ -1,10 +1,10 @@
-from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import login, logout
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import get_template
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView, ListView, TemplateView, UpdateView
+from django.views.generic import FormView, ListView, TemplateView
 
 import json
 
@@ -13,7 +13,8 @@ from .forms import (
     AddCarForm,
     AddCarOwnerForm,
     AddRepairForm,
-    LoginForm
+    LoginForm,
+    UpdateCarMileageForm
 )
 from .models import (
     BODY_TYPES,
@@ -29,22 +30,41 @@ from xhtml2pdf import pisa
 
 
 class MainView(TemplateView):
+    """
+    Render App homepage's template.
+    """
     template_name = 'main.html'
 
 
 class SearchCarReportView(View):
+    """
+    Search a car in the DB by number of the registration certificate
+    to generate a car report PDF file.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Render a form to search a car in the DB.
+        :param request: get
+        :return: render template that includes form
+        """
         form = SearchCarReportForm()
         context = {'form': form}
         return render(request, 'search_car_report.html', context)
 
     def post(self, request, *args, **kwargs):
+        """
+        Search a car in the DB by number of the registration certificate.
+        If the data is valid you can genereate a car report PDF file.
+        :param request: post
+        :return: Car object from DB
+        """
         form = SearchCarReportForm(request.POST)
         context = {'form': form}
         if form.is_valid():
             number_of_the_registration_certificate = form.cleaned_data['number_of_the_registration_certificate']
 
-            car = get_object_or_404(Car, number_of_the_registration_certificate__icontains=number_of_the_registration_certificate)
+            car = (get_object_or_404(
+                Car, number_of_the_registration_certificate__icontains=number_of_the_registration_certificate))
             # return redirect("car_report", car_id=car.pk)
             context |= {'car': car}
 
@@ -52,6 +72,12 @@ class SearchCarReportView(View):
 
 
 def render_pdf_view(request, *args, **kwargs):
+    """
+    Render a car report PDF file.
+    :param request: get
+    :param kwargs: car_id
+    :return: Car report PDF file which contains all informations about the car
+    """
     car = get_object_or_404(Car, pk=kwargs['car_id'])
     car_repairs = Repair.objects.filter(car=kwargs['car_id'])
     template_path = 'pdf/pdf_car_report.html'
@@ -61,11 +87,13 @@ def render_pdf_view(request, *args, **kwargs):
        }
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
+    # Display the PDF file in browser
     response['Content-Disposition'] = f'filename="raport_{car.plate_number}.pdf"'
+    # Download the PDF file
+    # response['Content-Disposition'] = 'attachment, filename="report.pdf"'
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
-
     # create a pdf
     pisa_status = pisa.CreatePDF(
         html, dest=response)
@@ -76,12 +104,25 @@ def render_pdf_view(request, *args, **kwargs):
 
 
 class AddCarView(View):
+    """
+    Add a car to the DB.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Render a form to add a car to the DB.
+        :param request: get
+        :return: render template that includes form
+        """
         form = AddCarForm()
         context = {'form': form}
         return render(request, "add_car.html", context)
 
     def post(self, request, *args, **kwargs):
+        """
+        Get the data from form and add a car to the DB.
+        :param request: post
+        :return: add a Car object to DB and redirect to Mechanic's homepage or raise form error
+        """
         form = AddCarForm(request.POST, request.FILES)
         context = {'form': form}
         if form.is_valid():
@@ -125,7 +166,16 @@ class AddCarView(View):
 
 
 class CarView(View):
+    """
+    Get and print a car, car's owner and car's repairs from DB.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Get a car, car's owner and car's repairs from DB.
+        :param request: get
+        :param kwargs: car_id
+        :return: Car, CarOwner, Repair objects from DB and render template that prints the data
+        """
         car = get_object_or_404(Car, pk=kwargs['car_id'])
         car_owner = get_object_or_404(CarOwner, car=kwargs['car_id'])
         car_repairs = Repair.objects.filter(car=kwargs['car_id'])
@@ -138,7 +188,16 @@ class CarView(View):
 
 
 class CarOwnerView(View):
+    """
+    Get and print car owner from DB.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Get a car owner from DB.
+        :param request: get
+        :param kwargs: car_owner_id
+        :return: CarOwner object and render template that prints the data
+        """
         car_owner = get_object_or_404(CarOwner, pk=kwargs['car_owner_id'])
         context = {
             'car_owner': car_owner,
@@ -147,12 +206,25 @@ class CarOwnerView(View):
 
 
 class AddCarOwnerView(View):
+    """
+    Add a car owner to DB.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Render a form to add a car owner to DB.
+        :param request: get
+        :return: render template that includes form
+        """
         form = AddCarOwnerForm()
         context = {'form': form}
         return render(request, 'add_car_owner.html', context)
 
     def post(self, request, *args, **kwargs):
+        """
+        Get the data from form and add a car owner to DB.
+        :param request: post
+        :return: add a CarOwner object to DB and redirect to Mechanic's homepage or raise form error
+        """
         form = AddCarOwnerForm(request.POST)
         context = {'form': form}
         if form.is_valid():
@@ -162,7 +234,16 @@ class AddCarOwnerView(View):
 
 
 class RepairView(View):
+    """
+    Get and print a car's repairs from DB.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Get and print a car and car's repairs from DB.
+        :param request: get
+        :param kwargs: car_id, repair_id
+        :return: Car and Repair objects from DB and render template that prints the data
+        """
         car_pk = kwargs['car_id']
         repair_pk = kwargs['repair_id']
 
@@ -177,24 +258,50 @@ class RepairView(View):
 
 
 class AddRepairView(View):
+    """
+    Add a car's repair to DB.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Render a form to add a car's repair to DB.
+        :param request: get
+        :return: render template that includes form
+        """
         form = AddRepairForm()
         context = {'form': form}
         return render(request, 'add_repair.html', context)
 
     def post(self, request, *args, **kwargs):
+        """
+        Get the data from form and add a car's repair to DB.
+        Get the car.pk from 'car' form field to correctly redirect.
+        :param request: post
+        :return: add a Repair object to DB, get car.pk and redirect to URL 'update_mileage' or raise form error
+        """
         form = AddRepairForm(request.POST)
         context = {'form': form}
         if form.is_valid():
+            car_pk = form.cleaned_data['car'].pk
             form.save()
-            return redirect("mechanic")
+            return redirect("update_mileage", car_id=car_pk)
         return render(request, 'add_repair.html', context)
 
 
 def calendar_view(request):
+    """
+    Render fullcalendar.js's template.
+    :param request: get
+    :return: render template
+    """
     return render(request, 'calendar.html')
 
+
 def events_json(request):
+    """
+    Get events from DB.
+    :param request: get
+    :return: Event objects from DB
+    """
     events = Event.objects.all()
     events_list = []
     for event in events:
@@ -208,6 +315,11 @@ def events_json(request):
 
 
 def add_event(request):
+    """
+    Add event to DB.
+    :param request: post
+    :return: add Event object to DB or raise error
+    """
     if request.method == "POST":
         data = json.loads(request.body)
         title = data.get('title')
@@ -219,25 +331,13 @@ def add_event(request):
     return HttpResponseBadRequest("Invalid request")
 
 
-def update_event(request, event_id):
-    try:
-        event = Event.objects.get(id=event_id)
-    except Event.DoesNotExist:
-        return HttpResponseBadRequest("Event not found")
-
-    if request.method == "POST":
-        data = json.loads(request.body)
-        event.title = data.get('title', event.title)
-        event.start = data.get('start', event.start)
-        event.end = data.get('end', event.end)
-        event.save()
-        return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end})
-
-    return HttpResponseBadRequest("Invalid request")
-
-
-
 def delete_event(request, event_id):
+    """
+    Delete event from DB.
+    :param request: delete
+    :param event_id: event.pk
+    :return: delete Event object from DB
+    """
     try:
         event = Event.objects.get(id=event_id)
     except Event.DoesNotExist:
@@ -251,7 +351,15 @@ def delete_event(request, event_id):
 
 
 class MechanicView(View):
+    """
+    Render Mechanic's homepage.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Render Mechanic's homepage.
+        :param request: get
+        :return: render template
+        """
         return render(request, 'mechanic_site.html')
 
 
@@ -280,7 +388,14 @@ class MechanicView(View):
 #             description = data.get('description')
 #             if title and start:
 #                 event = Event.objects.create(title=title, start=start, end=end, description=description)
-#                 return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end, 'description': event.description})
+#                 return JsonResponse(
+#                        {
+#                        'id': event.id,
+#                        'title': event.title,
+#                        'start': event.start,
+#                        'end': event.end,
+#                        'description': event.description
+#                        })
 #         return HttpResponseBadRequest("Invalid request")
 #
 #
@@ -298,7 +413,13 @@ class MechanicView(View):
 #             event.end = data.get('end', event.end)
 #             event.description = data.get('description', event.description)
 #             event.save()
-#             return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end, 'description': event.description})
+#             return JsonResponse(
+#                    {'id': event.id,
+#                    'title': event.title,
+#                    'start': event.start,
+#                    'end': event.end,
+#                    'description': event.description
+#                    })
 #
 #         return HttpResponseBadRequest("Invalid request")
 #
@@ -318,23 +439,76 @@ class MechanicView(View):
 
 
 class LoginView(FormView):
+    """
+    Render login form, log in user and redirect to Mechanic's homepage or raise login error.
+    """
     form_class = LoginForm
     template_name = 'login.html'
     success_url = reverse_lazy('mechanic')
 
 
 class LogoutView(View):
+    """
+    Log out user and redirect to the App's homepage.
+    """
     def get(self, request, *args, **kwargs):
         logout(request)
         return redirect('main')
 
 
 class CarListView(ListView):
+    """
+    Return a list of all cars.
+    """
     model = Car
     template_name = "car_list.html"
 
 
 class CarOwmerListView(ListView):
+    """
+    Return a list of all car owmers.
+    """
     model = CarOwner
     template_name = "car_owner_list.html"
 
+
+class CarMileageUpdate(View):
+    """
+    Update car's mileage.
+    """
+    def get(self, request, *args, **kwargs):
+        """
+        Render a form to update car's mileage.
+        :param request: get
+        :param kwargs: car_id
+        :return: Car object from DB and render template that includes form
+        """
+        car_pk = kwargs['car_id']
+        car = get_object_or_404(Car, pk=car_pk)
+        form = UpdateCarMileageForm
+        context = {
+            'form': form,
+            'car': car,
+        }
+        return render(request, "car_mileage_update_form.html", context)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Get the data from form and update car's mileage.
+        :param request: post
+        :param kwargs: car_id
+        :return: Car object from DB, update car.mileage and redirect to Mechanic's homepage or raise form error
+        """
+        car_pk = kwargs['car_id']
+        car = get_object_or_404(Car, pk=car_pk)
+        form = UpdateCarMileageForm(request.POST)
+        context = {
+            'form': form,
+            'car': car,
+        }
+        if form.is_valid():
+            mileage = form.cleaned_data['mileage']
+            car.mileage = mileage
+            car.save()
+            return redirect("mechanic")
+        return render(request, 'car_mileage_update_form.html', context)

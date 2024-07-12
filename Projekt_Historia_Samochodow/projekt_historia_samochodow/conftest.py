@@ -11,7 +11,7 @@ from .models import (
 
 
 @pytest.fixture
-def add_car():
+def car():
     return Car.objects.create(
         brand="Test brand",
         model="Test model",
@@ -32,7 +32,7 @@ def add_car():
 
 
 @pytest.fixture
-def add_car_owner():
+def car_owner():
     car = Car.objects.create(
         brand="Test brand",
         model="Test model",
@@ -61,7 +61,7 @@ def add_car_owner():
 
 
 @pytest.fixture
-def add_repair():
+def repair():
     car = Car.objects.create(
         brand="Test brand",
         model="Test model",
@@ -93,7 +93,7 @@ def add_repair():
 
 
 @pytest.fixture
-def add_event():
+def event():
     return Event.objects.create(
         title="Test event",
         start=datetime.date(2023, 1, 1),

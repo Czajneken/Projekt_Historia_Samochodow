@@ -45,60 +45,6 @@
                         calendar.unselect();
                     },
                     eventClick: function(info) {
-                        var title = prompt('Zaktualizuj tytuł wydarzenia:', info.event.title);
-                        if (title) {
-                            var eventData = {
-                                title: title,
-                                start: info.event.start.toISOString(),
-                                end: info.event.end ? info.event.end.toISOString() : null
-                            };
-                            fetch('/api/events/update/' + info.event.id + '/', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRFToken': getCookie('csrftoken')
-                                },
-                                body: JSON.stringify(eventData)
-                            })
-                            .then(response => response.json())
-                            .then(event => {
-                                info.event.setProp('title', event.title);
-                                info.event.setStart(event.start);
-                                info.event.setEnd(event.end);
-                            });
-                        }
-                    },
-                    eventDrop: function(info) {
-                        var eventData = {
-                            title: info.event.title,
-                            start: info.event.start.toISOString(),
-                            end: info.event.end ? info.event.end.toISOString() : null
-                        };
-                        fetch('/api/events/update/' + info.event.id + '/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': getCookie('csrftoken')
-                            },
-                            body: JSON.stringify(eventData)
-                        });
-                    },
-                    eventResize: function(info) {
-                        var eventData = {
-                            title: info.event.title,
-                            start: info.event.start.toISOString(),
-                            end: info.event.end.toISOString()
-                        };
-                        fetch('/api/events/update/' + info.event.id + '/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': getCookie('csrftoken')
-                            },
-                            body: JSON.stringify(eventData)
-                        });
-                    },
-                    eventClick: function(info) {
                         if (confirm('Czy na pewno chcesz usunąć to wydarzenie?')) {
                             fetch('/api/events/delete/' + info.event.id + '/', {
                                 method: 'DELETE',

@@ -35,7 +35,6 @@ urlpatterns = [
     path('calendar/', phs_views.calendar_view, name='calendar'),
     path('api/events/', phs_views.events_json, name='events_json'),
     path('api/events/add/', phs_views.add_event, name='add_event'),
-    path('api/events/update/<int:event_id>/', phs_views.update_event, name='update_event'),
     path('api/events/delete/<int:event_id>/', phs_views.delete_event, name='delete_event'),
     path('mechanic', phs_views.MechanicView.as_view(), name='mechanic'),
     # path('all_events', phs_views.CalendarAllEventsView.as_view(), name='all_events'),
@@ -46,6 +45,7 @@ urlpatterns = [
     path('logout', phs_views.LogoutView.as_view(), name='logout'),
     path('car_list', phs_views.CarListView.as_view(), name='car_list'),
     path('car_owner_list', phs_views.CarOwmerListView.as_view(), name='car_owner_list'),
+    path('update_mileage/<int:car_id>', phs_views.CarMileageUpdate.as_view(), name='update_mileage'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

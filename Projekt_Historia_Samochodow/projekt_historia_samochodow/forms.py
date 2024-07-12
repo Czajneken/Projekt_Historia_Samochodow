@@ -61,3 +61,6 @@ class LoginForm(forms.Form):
         if user is None:
             raise ValidationError("Podaj poprawny login lub hasło")
 
+
+class UpdateCarMileageForm(forms.Form):
+    mileage = forms.IntegerField(label='Przebieg')
