@@ -1,4 +1,4 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import get_user_model, login, logout
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import get_template
@@ -7,6 +7,8 @@ from django.views import View
 from django.views.generic import FormView, ListView, TemplateView
 
 import json
+
+from xhtml2pdf import pisa
 
 from .forms import (
     SearchCarReportForm,
@@ -26,7 +28,7 @@ from .models import (
     Event
 )
 
-from xhtml2pdf import pisa
+User = get_user_model()
 
 
 class MainView(TemplateView):
@@ -287,69 +289,6 @@ class AddRepairView(View):
         return render(request, 'add_repair.html', context)
 
 
-def calendar_view(request):
-    """
-    Render fullcalendar.js's template.
-    :param request: get
-    :return: render template
-    """
-    return render(request, 'calendar.html')
-
-
-def events_json(request):
-    """
-    Get events from DB.
-    :param request: get
-    :return: Event objects from DB
-    """
-    events = Event.objects.all()
-    events_list = []
-    for event in events:
-        events_list.append({
-            'id': event.id,
-            'title': event.title,
-            'start': event.start.isoformat(),
-            'end': event.end.isoformat() if event.end else None,
-        })
-    return JsonResponse(events_list, safe=False)
-
-
-def add_event(request):
-    """
-    Add event to DB.
-    :param request: post
-    :return: add Event object to DB or raise error
-    """
-    if request.method == "POST":
-        data = json.loads(request.body)
-        title = data.get('title')
-        start = data.get('start')
-        end = data.get('end')
-        if title and start:
-            event = Event.objects.create(title=title, start=start, end=end)
-            return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end})
-    return HttpResponseBadRequest("Invalid request")
-
-
-def delete_event(request, event_id):
-    """
-    Delete event from DB.
-    :param request: delete
-    :param event_id: event.pk
-    :return: delete Event object from DB
-    """
-    try:
-        event = Event.objects.get(id=event_id)
-    except Event.DoesNotExist:
-        return HttpResponseBadRequest("Event not found")
-
-    if request.method == "DELETE":
-        event.delete()
-        return JsonResponse({"status": "deleted"})
-
-    return HttpResponseBadRequest("Invalid request")
-
-
 class MechanicView(View):
     """
     Render Mechanic's homepage.
@@ -512,3 +451,75 @@ class CarMileageUpdate(View):
             car.save()
             return redirect("mechanic")
         return render(request, 'car_mileage_update_form.html', context)
+
+
+def calendar_view(request):
+    """
+    Render fullcalendar.js's template.
+    :param request: get
+    :return: render template
+    """
+    return render(request, 'calendar.html')
+
+
+def events_json(request):
+    """
+    Get events from DB.
+    :param request: get
+    :return: Event objects from DB
+    """
+    events = Event.objects.all()
+    events_list = []
+    for event in events:
+        events_list.append({
+            'id': event.id,
+            'title': event.title,
+            'start': event.start.isoformat(),
+            'end': event.end.isoformat() if event.end else None,
+        })
+    return JsonResponse(events_list, safe=False)
+
+
+def add_event(request):
+    """
+    Add event to DB.
+    :param request: post
+    :return: add Event object to DB or raise error
+    """
+    if request.method == "POST":
+        data = json.loads(request.body)
+        title = data.get('title')
+        start = data.get('start')
+        end = data.get('end')
+        if title and start:
+            event = Event.objects.create(title=title, start=start, end=end)
+            return JsonResponse({'id': event.id, 'title': event.title, 'start': event.start, 'end': event.end})
+    return HttpResponseBadRequest("Invalid request")
+
+
+def delete_event(request, event_id):
+    """
+    Delete event from DB.
+    :param request: delete
+    :param event_id: event.pk
+    :return: delete Event object from DB
+    """
+    try:
+        event = Event.objects.get(id=event_id)
+    except Event.DoesNotExist:
+        return HttpResponseBadRequest("Event not found")
+
+    if request.method == "DELETE":
+        event.delete()
+        return JsonResponse({"status": "deleted"})
+
+    return HttpResponseBadRequest("Invalid request")
+
+
+class UserListView(ListView):
+    """
+    Return a user list.
+    """
+    model = User
+    template_name = 'user_list.html'
+    context_object_name = 'users'

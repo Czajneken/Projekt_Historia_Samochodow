@@ -120,10 +120,10 @@ def test_add_car_owner_view(client, car):
 
 @pytest.mark.django_db
 def test_add_repair(client, car):
-    response = client.get('http://127.0.0.1:8000/add_repair')
+    response = client.get('/add_repair/')
     assert response.status_code == 200
     response_post = client.post(
-        '/add_repair',
+        '/add_repair/',
         {
             'part': 'test part',
             'part_number': 'hs812',
@@ -136,7 +136,7 @@ def test_add_repair(client, car):
             'car': 1
         }
     )
-    assert response_post.status_code == 302
+    assert response_post.status_code == 302, response_post.context['form'].errors
     repair1 = Repair.objects.get(part='test part')
     assert repair1.part_number == 'hs812'
     assert repair1.type_of_repair == 1

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from django.urls import reverse_lazy
 import io
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -148,3 +149,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 PHONENUMBER_DB_FORMAT = "NATIONAL"
 
 PHONENUMBER_DEFAULT_REGION = 'PL'
+
+# Email settings
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'django.project.phs@gmail.com'
+# EMAIL_HOST_PASSWORD = 'Djangoproject!998'
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+
+
